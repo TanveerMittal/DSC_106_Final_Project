@@ -131,9 +131,6 @@ def fill_map(df, year, complaints):
     #Set the zoom to the maximum possible
     m.fit_bounds(m.get_bounds())
 
-    # Save the map to an HTML file
-    m.save('simple_dot_plot.html')
-
     # Display map
     return m
 

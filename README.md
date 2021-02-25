@@ -17,3 +17,4 @@
 + **Notes:**
   + All of our final plot renders can be viewed in `Final Plots.ipynb` and the code for our plots can be found in `plots.py`
   + The dashboard takes time to load the data and plots in for the first time. After that it is cached for faster refreshing and rerendering.
+  + Libraries we used can be found in `requirements.txt`

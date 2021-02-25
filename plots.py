@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-def create_line_plot(df, complaints=None):
+def create_line_plot(df, complaints):
     # Drop N/A values
     df['CMPLNT_FR_DT'] = df['CMPLNT_FR_DT'].dropna()
     # Extract Year
@@ -20,7 +20,7 @@ def create_line_plot(df, complaints=None):
     years = np.unique(df['CMPLNT_FR_YEAR'])
     
     # If no complaint type specified, plot all complaint types
-    if complaints == None:
+    if len(complaints) == 0:
         # Month level granularity
         df_line = df.groupby(['CMPLNT_FR_YEAR', 'CMPLNT_FR_MONTH']).count().reset_index()
         df_line['time'] = df_line[['CMPLNT_FR_YEAR', 'CMPLNT_FR_MONTH']].agg('-'.join, axis=1)
@@ -59,6 +59,8 @@ def create_line_plot(df, complaints=None):
     # Set x-ticks
     fig.update_layout(
         title="NYPD Complaints over Time",
+        xaxis_title="Time(Years)",
+        yaxis_title="Number of Complaints",
         title_x=0.5,
         font_size=12,
         xaxis = dict(
@@ -72,10 +74,16 @@ def create_line_plot(df, complaints=None):
     return fig
 
 def bar_chart(df):
+    # Count categories
     cats = df["OFNS_DESC"].value_counts().reset_index(drop=False).rename({"index":"category", "OFNS_DESC": "count"}, axis=1)
+
+    # Filter small category counts
     cats = cats[cats["count"] > 6000]
+
+    # Create and format bar chart
     fig = px.bar(cats, x="count", y="category", orientation='h')
-    fig.update_layout(title="NYPD Complaint Frequencies", title_x=0.5, font_size=12,
+    fig.update_layout(title="NYPD Complaint Frequencies", title_x=0.5, font_size=10,
+                      xaxis_title="Number of Complaints", yaxis_title="Criminal Offense Categories", 
                       barmode='stack', yaxis={'categoryorder':'total ascending'})
     return fig
 
@@ -96,7 +104,8 @@ def fill_map(df, year, complaints):
     df_map = df[df['ADDR_PCT_CD'] > 0]
     # Filter by year and complaint types
     df_map = df_map[df_map['CMPLNT_FR_YEAR'] == year]
-    df_map = df_map[df_map['LAW_CAT_CD'].isin(complaints)]
+    if len(complaints) > 0:
+        df_map = df_map[df_map['LAW_CAT_CD'].isin(complaints)]
     
     # Groupby precinct and calculate number of complaints + centroid of coordinates
     df_map = df_map[['CMPLNT_NUM', 'ADDR_PCT_CD', 'Latitude', 'Longitude']].groupby('ADDR_PCT_CD').agg({
@@ -129,15 +138,18 @@ def fill_map(df, year, complaints):
     return m
 
 def sankey_diagram(df):
+    # Query and clean demographics data
     demographics = df[['OFNS_DESC', 'SUSP_RACE', 'SUSP_SEX', 'VIC_RACE', 'VIC_SEX',]
                     ].replace("UNKNOWN",None).replace("U", None ).replace("D", None
                     ).replace("E", None).replace("OTHER", None).dropna()
+
+    # Define rgb colors for nodes and links
     node_colors = ['rgba(23, 190, 207, 0.8)', 'rgba(44, 160, 44, 0.8)',
                    'rgba(148, 103, 189, 0.8)', 'rgba(188, 189, 34, 0.8)',
                    'rgba(214, 39, 40, 0.8)', 'rgba(227, 119, 194, 0.8)']
     link_colors = [col.replace("0.8", "0.4") for col in node_colors]
 
-
+    # Construct and populate graph structure
     nodes = list(demographics["SUSP_RACE"].unique()) * 2
     node_mapping = {nodes[i]:i for i in range(len(nodes)//2)}
     race_combo_counts = demographics.groupby(["SUSP_RACE", "VIC_RACE"]).count()
@@ -150,7 +162,8 @@ def sankey_diagram(df):
         target.append(node_mapping[i[1]] + len(node_mapping))
         value.append(race_combo_counts.loc[i, "OFNS_DESC"])
         edge_colors.append(link_colors[node_mapping[i[0]]])
-        
+    
+    # Create and format Sankey Diagram
     fig = go.Figure(data=[go.Sankey(
                     node = dict(
                       pad = 15,
@@ -165,6 +178,5 @@ def sankey_diagram(df):
                       value = value,
                         color=edge_colors
                   ))])
-
     fig.update_layout(title_text="Relationships between Suspect Race and Victim Race", font_size=12, title_x=0.5)
     return fig

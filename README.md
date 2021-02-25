@@ -9,7 +9,7 @@
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. Download [dataset](https://data.cityofnewyork.us/api/views/qgea-i56i/rows.csv?accessType=DOWNLOAD) into a directory named `data` 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Run `pip install requirements.text`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Run `pip install requirements.txt`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. Run `streamlit run app.py`
 
@@ -19,5 +19,5 @@
 
 + **Notes:**
   + All of our final plot renders can be viewed in `Final Plots.ipynb` and the code for our plots can be found in `plots.py`
-  + The dashboard takes time to load the data and plots in for the first time. After that it is cached for faster refreshing and rerendering.
+  + The dashboard takes time to load the data and plots in for the first time. After that the plots and data are cached for faster refreshing and rerendering. Changing any plot's features will require time for it to be computed again but all other unchanged plots are cached and will render nearly instantly.
   + The libraries we used can be found in `requirements.txt`

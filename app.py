@@ -29,8 +29,8 @@ def main():
     if render:
         st.plotly_chart(get_plot_2(df)["plot"])
 
-    # Render Chloroploth
-    st.markdown("# Chloroploth of NYPD Complaints by Precinct:")
+    # Render Heatmap
+    st.markdown("# Proprtional Symbol Map of NYPD Complaints by Precinct:")
     year = st.slider("Select year to plot:", min_value=2006, max_value=2019)
     complaints_2 = st.multiselect("Select Complaint Types to plot or select none to aggregate all 3:", ["Felony", "Misdemeanor", "Violation"], key=2)
     if render:
